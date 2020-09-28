@@ -26,9 +26,9 @@ import static matriz.util.Matriz.MATRIZTEXTO;
 import matriz.util.NodoDoble;
 import matriz.util.Tripleta;
 
-public class MatrizEnListaLigadaForma2 {
+public class MatrizEnListaLigadaForma2v2 {
 
-    NodoDoble nodoConfiguracion; // en el libro se llama mat
+    NodoDoble nodoConfiguracion;// en el libro se llama mat
 
     /**
      * Constructor de la matriz sin elementos
@@ -36,7 +36,7 @@ public class MatrizEnListaLigadaForma2 {
      * @param numeroFilas cantidad de filas de la matriz
      * @param numeroColumnas cantidad de columnas de la matriz
      */
-    public MatrizEnListaLigadaForma2(int numeroFilas, int numeroColumnas) {
+    public MatrizEnListaLigadaForma2v2(int numeroFilas, int numeroColumnas) {
         construirNodosCabeza(numeroFilas, numeroColumnas);
     }
 
@@ -81,15 +81,30 @@ public class MatrizEnListaLigadaForma2 {
      * @param t
      */
     public void setCelda(Tripleta t) {
-        NodoDoble nuevoNodo = new NodoDoble(t);
-        conectarFilas(nuevoNodo);
-        conectarColumnas(nuevoNodo);
-        int c = (Integer) nodoConfiguracion.getT().getV();
-        nodoConfiguracion.getT().setV(c++);
+        double valor = (double) t.getV();
+        if (valor==0) {
+            boolean existe = existeNodo(t);
+            if (existe==false) {
+                System.out.println("No se incluye valor, debido a que la matriz no recibe valores en 0");
+            }else{
+                NodoDoble nuevoNodo = new NodoDoble(t);
+                desconectarFilas(nuevoNodo);
+                desconectarColumnas(nuevoNodo);
+                int c = (Integer) nodoConfiguracion.getT().getV();
+                nodoConfiguracion.getT().setV(c--);
+            }    
+                
+        }else{
+            NodoDoble nuevoNodo = new NodoDoble(t);
+            conectarFilas(nuevoNodo);
+            conectarColumnas(nuevoNodo);
+            int c = (Integer) nodoConfiguracion.getT().getV();
+            nodoConfiguracion.getT().setV(c++);
+          }  
     }
 
     /**
-     * Método que ingresa un nodo recorriendo la lista de las filas
+     * Método que ingresa un nodo recorriendo la lista de las filas. 
      *
      * @param nuevoNodo
      */
@@ -190,13 +205,13 @@ public class MatrizEnListaLigadaForma2 {
         return nodoConfiguracion.getLigaC();
     }
 
-    public static MatrizEnListaLigadaForma2 entregarMatrizRelacion() {
+    public static MatrizEnListaLigadaForma2v2 entregarMatrizRelacion() {
 
         String[] filas = MATRIZTEXTO.split("\n");
         int cpc = filas[0].length();
         int cln = filas.length;
 
-        MatrizEnListaLigadaForma2 matrizEnListaLigadaForma2 = new MatrizEnListaLigadaForma2(cln, cpc);
+        MatrizEnListaLigadaForma2v2 matrizEnListaLigadaForma2 = new MatrizEnListaLigadaForma2v2(cln, cpc);
 
         int i = 1;
         int j = 1;
@@ -271,5 +286,131 @@ public class MatrizEnListaLigadaForma2 {
         }
         return cadena.toString();
     }
+/**
+ * Método que verifica la existencia de nodo con tripleta particular
+ *
+ * @param t
+ */
+    private boolean existeNodo(Tripleta t) {
+        NodoDoble nuevoNodo = new NodoDoble(t);
+        int numColumna = nuevoNodo.getT().getC();
+        int numFila = nuevoNodo.getT().getF(); 
+        
+        NodoDoble cabeza = getCabeza();
+        NodoDoble ultimo = cabeza;
+        NodoDoble nodoRecorrido = cabeza.getLigaC();
 
+        boolean nodoExiste = false;
+        
+        while (nodoRecorrido != null && nodoRecorrido != cabeza) {
+            if (nodoRecorrido.getT().getC() < numColumna) {
+                ultimo = nodoRecorrido;
+                nodoRecorrido = nodoRecorrido.getLigaC();
+            } else {
+                break;
+            }
+        }
+
+        while (nodoRecorrido != null && nodoRecorrido != cabeza) {
+            if (nodoRecorrido.getT().getC() == numColumna) {
+                if (nodoRecorrido.getT().getF() < numFila) {
+                    ultimo = nodoRecorrido;
+                    nodoRecorrido = nodoRecorrido.getLigaC();
+                } else if (nodoRecorrido.getT().getF() == numFila) {
+                    nodoExiste = true;
+                    break;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+ 
+        return nodoExiste;
+    }
+
+/**
+ * Método para desconectar la liga por filas de un nodo especifico
+ *
+ * @param nuevoNodo
+ */    
+    
+    private void desconectarFilas(NodoDoble nuevoNodo) {
+        // datos para la comparación
+        int filaNuevoNodo = nuevoNodo.getT().getF();
+        int columnaNuevoNodo = nuevoNodo.getT().getC();
+
+        // nodos para el recorrido
+        NodoDoble cabeza = this.getCabeza();
+        NodoDoble ultimo = cabeza;
+        NodoDoble nodoRecorrido = cabeza.getLigaF();
+
+        // Permite posicionar el nodoRecorrido en la fila correcta para desconectar 
+        while (nodoRecorrido != null && nodoRecorrido != cabeza) {
+            if (nodoRecorrido.getT().getF() < filaNuevoNodo) {
+                ultimo = nodoRecorrido;
+                nodoRecorrido = nodoRecorrido.getLigaF();
+            } else {
+                break;
+            }
+        }
+
+        while (nodoRecorrido != null && nodoRecorrido != cabeza) {
+            if (nodoRecorrido.getT().getF() == filaNuevoNodo) {
+                if (nodoRecorrido.getT().getC() < columnaNuevoNodo) {
+                    ultimo = nodoRecorrido;
+                    nodoRecorrido = nodoRecorrido.getLigaF();
+                } else if (nodoRecorrido.getT().getC() == columnaNuevoNodo) {
+                    ultimo.setLigaF(nodoRecorrido.getLigaF());
+                    break;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+/**
+ * Método para desconectar la liga por columnas de un nodo especifico
+ *
+ * @param nuevoNodo
+ */ 
+    
+    private void desconectarColumnas(NodoDoble nuevoNodo) {
+        // datos para la comparación
+        int filaNuevoNodo = nuevoNodo.getT().getF();
+        int columnaNuevoNodo = nuevoNodo.getT().getC();
+
+        // nodos para el recorrido
+        NodoDoble cabeza = getCabeza();
+        NodoDoble ultimo = cabeza;
+        NodoDoble nodoRecorrido = cabeza.getLigaC();
+
+        while (nodoRecorrido != null && nodoRecorrido != cabeza) {
+            if (nodoRecorrido.getT().getC() < columnaNuevoNodo) {
+                ultimo = nodoRecorrido;
+                nodoRecorrido = nodoRecorrido.getLigaC();
+            } else {
+                break;
+            }
+        }
+
+        while (nodoRecorrido != null && nodoRecorrido != cabeza) {
+            if (nodoRecorrido.getT().getC() == columnaNuevoNodo) {
+                if (nodoRecorrido.getT().getF() < filaNuevoNodo) {
+                    ultimo = nodoRecorrido;
+                    nodoRecorrido = nodoRecorrido.getLigaC();
+                } else if (nodoRecorrido.getT().getF() == filaNuevoNodo) {
+                    ultimo.setLigaC(nodoRecorrido.getLigaC());
+                    break;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
 }
